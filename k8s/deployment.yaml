@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docgen
+  namespace: logsight
+  labels:
+    app: docgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docgen
+  template:
+    metadata:
+      labels:
+        app: docgen
+    spec:
+      containers:
+        - name: docgen
+          image: docgen:0.1.0
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docgen-secrets
+                  key: OPENAI_API_KEY
+            - name: CORS_ORIGINS
+              value: "https://logsight.home.arpa,http://localhost:3000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docgen
+  namespace: logsight
+  labels:
+    app: docgen
+spec:
+  selector:
+    app: docgen
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docgen
+  namespace: logsight
+  annotations:
+    cert-manager.io/cluster-issuer: "lan-ca-issuer"
+    nginx.ingress.nginx.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - docgen.home.arpa
+      secretName: docgen-tls
+  rules:
+    - host: docgen.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: docgen
+                port:
+                  name: http
