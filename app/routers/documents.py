@@ -60,16 +60,12 @@ async def generate_from_file(
 
 
 @router.post("/generate/text", response_model=GenerateResponse)
-async def generate_from_text(request: GenerateRequest, raw_config: str = ""):
-    """Paste raw config text and generate documentation."""
-    # Accept raw_config from body or use a combined model
-    if not raw_config:
-        raise HTTPException(400, "raw_config field is required")
-
-    if len(raw_config) > 100_000:
+async def generate_from_text(request: GenerateRequest):
+    """Post raw config text as JSON and generate documentation."""
+    if len(request.raw_config) > 100_000:
         raise HTTPException(413, "Config too large — max 100KB for MVP")
 
-    parsed = parse_config(raw_config, request.config_type)
+    parsed = parse_config(request.raw_config, request.config_type)
 
     return await generate_documentation(
         parsed=parsed,

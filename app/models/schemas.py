@@ -41,6 +41,7 @@ class DocStyle(str, Enum):
 
 class GenerateRequest(BaseModel):
     """Request to generate documentation from uploaded content."""
+    raw_config: str = Field(..., description="Raw infrastructure config text")
     config_type: ConfigType = ConfigType.AUTO_DETECT
     output_format: OutputFormat = OutputFormat.MARKDOWN
     doc_style: DocStyle = DocStyle.TECHNICAL
