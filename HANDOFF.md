@@ -49,28 +49,28 @@ If no OPENAI_API_KEY env var is set, ask the user or skip — the app has a fall
 5. Apply: `kubectl apply -k ~/homelab-gitops/apps/docgen/`
 6. Wait: `kubectl -n logsight rollout status deployment/docgen`
 
-## Task 6: Add DNS entry (if CoreDNS manages home.arpa)
+## Task 6: Add DNS entry (if CoreDNS manages example.internal)
 
-Add `docgen.home.arpa` pointing to the MetalLB VIP (192.168.1.50) or verify ingress picks it up automatically.
+Add `docgen.example.internal` pointing to the MetalLB VIP (10.0.0.10) or verify ingress picks it up automatically.
 
 ## Task 7: Smoke test
 
 ```bash
 # Health check
-curl -s https://docgen.home.arpa/health --cacert /etc/ssl/certs/lan-ca.crt
+curl -s https://docgen.example.internal/health --cacert /etc/ssl/certs/lan-ca.crt
 
 # List supported formats
-curl -s https://docgen.home.arpa/api/v1/formats --cacert /etc/ssl/certs/lan-ca.crt | python -m json.tool
+curl -s https://docgen.example.internal/api/v1/formats --cacert /etc/ssl/certs/lan-ca.crt | python -m json.tool
 
 # Generate docs from a k8s manifest
-curl -X POST https://docgen.home.arpa/api/v1/generate \
+curl -X POST https://docgen.example.internal/api/v1/generate \
   --cacert /etc/ssl/certs/lan-ca.crt \
   -F "file=@/path/to/any/deployment.yaml" \
   -F "doc_style=technical" \
   -F "include_diagram=true" | python -m json.tool
 
 # Generate from raw text
-curl -X POST https://docgen.home.arpa/api/v1/generate/text \
+curl -X POST https://docgen.example.internal/api/v1/generate/text \
   --cacert /etc/ssl/certs/lan-ca.crt \
   -H "Content-Type: application/json" \
   -d '{"config_type":"auto_detect","doc_style":"runbook","raw_config":"apiVersion: v1\nkind: Service\nmetadata:\n  name: test\nspec:\n  ports:\n    - port: 80"}'
@@ -85,4 +85,4 @@ curl -X POST https://docgen.home.arpa/api/v1/generate/text \
 - [ ] /health returns 200
 - [ ] /api/v1/formats returns config types and doc styles
 - [ ] File upload generates documentation
-- [ ] Ingress accessible at docgen.home.arpa
+- [ ] Ingress accessible at docgen.example.internal

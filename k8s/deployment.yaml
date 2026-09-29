@@ -28,7 +28,7 @@ spec:
                   name: docgen-secrets
                   key: OPENAI_API_KEY
             - name: CORS_ORIGINS
-              value: "https://logsight.home.arpa,http://localhost:3000"
+              value: "https://logsight.example.internal,http://localhost:3000"
           resources:
             requests:
               memory: "128Mi"
@@ -76,10 +76,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - docgen.home.arpa
+        - docgen.example.internal
       secretName: docgen-tls
   rules:
-    - host: docgen.home.arpa
+    - host: docgen.example.internal
       http:
         paths:
           - path: /

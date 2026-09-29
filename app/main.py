@@ -27,7 +27,7 @@ app = FastAPI(
 )
 
 # CORS
-cors_origins = os.getenv("CORS_ORIGINS", "https://logsight.home.arpa,http://localhost:3000").split(",")
+cors_origins = os.getenv("CORS_ORIGINS", "https://logsight.example.internal,http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
